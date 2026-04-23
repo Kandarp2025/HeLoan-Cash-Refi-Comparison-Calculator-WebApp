@@ -87,13 +87,13 @@ export function calculateAPR(loanAmount: number, payment: number, months: number
   return ((low + high) / 2) * 100;
 }
 
-export function maxCashOut(homeValue: number, currentBalance: number, maxCltv = 80): number {
+export function maxCashOut(homeValue: number, currentBalance: number, maxCltv = 150): number {
   const maxLoan = homeValue * (maxCltv / 100);
   return Math.max(maxLoan - currentBalance, 0);
 }
 
 export function calculateComparison(inputs: CalculatorInputs): CalculatorResult {
-  const maxAvailableCash = maxCashOut(inputs.homeValue, inputs.currentMortgageBalance, 80);
+  const maxAvailableCash = maxCashOut(inputs.homeValue, inputs.currentMortgageBalance, 150);
   const matchedCashAmount = Math.min(inputs.heloanAmount, maxAvailableCash);
 
   const estimatedBaseNewLoanBalance = inputs.currentMortgageBalance + matchedCashAmount;
