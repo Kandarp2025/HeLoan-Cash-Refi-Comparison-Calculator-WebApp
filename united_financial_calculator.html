@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>United Financial - HELOAN vs Cash Refi Comparison</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --dark: #0f172a;
+      --soft: #f1f5f9;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 24px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Inter, Arial, sans-serif; background: var(--bg); color: var(--text); }
+    .container { max-width: 1280px; margin: 0 auto; padding: 32px 16px 48px; }
+    .topbar { display: flex; gap: 16px; justify-content: space-between; align-items: end; margin-bottom: 28px; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 8px 12px; border-radius: 999px; background: var(--card); border: 1px solid var(--border); font-size: 13px; font-weight: 600; margin-bottom: 12px; }
+    h1 { margin: 0; font-size: clamp(32px, 5vw, 56px); line-height: 1.05; }
+    .subtext { max-width: 820px; color: var(--muted); font-size: 18px; line-height: 1.6; margin-top: 12px; }
+    .button { border: 0; background: var(--dark); color: white; border-radius: 999px; padding: 14px 20px; font-size: 15px; font-weight: 600; cursor: pointer; }
+    .button.secondary { background: #334155; }
+    .button.ghost { background: #e2e8f0; color: #0f172a; }
+    .button:disabled { opacity: 0.6; cursor: not-allowed; }
+    .toggle-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 18px; padding: 16px 18px; margin-bottom: 28px; }
+    .toggle-row .muted { color: var(--muted); font-size: 14px; }
+    .switch { width: 52px; height: 30px; border-radius: 999px; background: #cbd5e1; position: relative; cursor: pointer; flex-shrink: 0; }
+    .switch.active { background: var(--dark); }
+    .switch::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: white; transition: transform 0.2s ease; }
+    .switch.active::after { transform: translateX(22px); }
+    .grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 32px; }
+    .stack { display: grid; gap: 24px; }
+    .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 24px; border: 1px solid rgba(226, 232, 240, 0.75); }
+    .card h2 { margin: 0 0 8px; font-size: 28px; }
+    .card .desc { color: var(--muted); margin-bottom: 24px; line-height: 1.6; }
+    .search-row { display: flex; gap: 12px; align-items: flex-start; flex-wrap: wrap; }
+    .search-row .field { flex: 1 1 320px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+    .summary-item { background: var(--soft); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+    .summary-item .label { color: var(--muted); font-size: 12px; margin-bottom: 4px; }
+    .summary-item .value { font-weight: 600; word-break: break-word; }
+    .status-message { margin-top: 12px; font-size: 14px; }
+    .status-message.error { color: #b91c1c; }
+    .status-message.success { color: #15803d; }
+    .action-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; }
+    .form-grid-2, .form-grid-3 { display: grid; gap: 24px; }
+    .form-grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .form-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .field label { display: block; font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .field input, .field select { width: 100%; border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; font-size: 15px; background: white; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .slider-wrap { margin-top: 8px; }
+    input[type="range"] { width: 100%; }
+    .range-meta { display: flex; justify-content: space-between; gap: 16px; color: var(--muted); font-size: 13px; margin-top: 8px; }
+    .switch-box { display: flex; justify-content: space-between; align-items: center; gap: 16px; border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
+    .comparison-wrap { overflow-x: auto; }
+    .card-header-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+    #reportDownloadButton { display: none; text-decoration: none; }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: white; }
+    th { background: var(--dark); color: white; text-align: left; padding: 14px 16px; font-size: 14px; }
+    td { padding: 14px 16px; border-top: 1px solid var(--border); font-size: 14px; }
+    tbody tr:nth-child(2) { background: #f8fafc; }
+    #calculatorSections { display: none; margin-top: 24px; }
+    #customerSummaryCard { display: none; margin-top: 24px; }
+    @media (max-width: 720px) {
+      .form-grid-2, .form-grid-3, .summary-grid { grid-template-columns: 1fr; }
+      .container { padding: 20px 12px 36px; }
+      .card { padding: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div>
+        <div class="badge">United Financial</div>
+        <h1>HELOAN vs Cash Refi Comparison Calculator</h1>
+        <div class="subtext">Build a comparison of HELOAN 20-year, Cash Refi 15-year, and Cash Refi 30-year scenarios from the information entered below.</div>
+      </div>
+      <!-- <button class="button" type="button">Compare Options</button> -->
+    </div>
+
+    <div class="card">
+      <h2>Search Customer Record</h2>
+      <div class="desc">Search by email, phone, or name to load an existing customer record into this calculator.</div>
+      <div class="search-row">
+        <div class="field">
+          <label for="searchInput">Customer search</label>
+          <input id="searchInput" type="text" placeholder="Search by email or phone" />
+        </div>
+        <button id="searchButton" class="button secondary" type="button" style="margin-top: 30px;">Search</button>
+      </div>
+      <div id="searchStatus" class="status-message" role="status" aria-live="polite"></div>
+    </div>
+
+    <div id="customerSummaryCard" class="card">
+      <h2>Customer Summary</h2>
+      <div class="summary-grid">
+        <div class="summary-item"><div class="label">Name</div><div id="summaryName" class="value">-</div></div>
+        <div class="summary-item"><div class="label">Email</div><div id="summaryEmail" class="value">-</div></div>
+        <div class="summary-item"><div class="label">Phone</div><div id="summaryPhone" class="value">-</div></div>
+      </div>
+    </div>
+
+    <div id="calculatorSections">
+      <div class="toggle-row">
+        <div>
+          <div><strong>Comparison mode</strong></div>
+          <div class="muted">Turn this on to show the HELOAN and cash refinance comparison table.</div>
+        </div>
+        <div id="comparisonSwitch" class="switch active" aria-label="Toggle comparison"></div>
+      </div>
+
+      <div class="grid">
+        <div class="stack">
+          <div class="card">
+            <h2>Cash-Out Refinance Inputs</h2>
+            <div class="desc">The cash-out amount follows the HELOAN amount so both options compare the same cash received.</div>
+
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="homeValue">Home value</label>
+                <input id="homeValue" type="number" />
+              </div>
+              <div class="field">
+                <label for="currentMortgageBalance">Current mortgage balance</label>
+                <input id="currentMortgageBalance" type="number" />
+              </div>
+            </div>
+
+            <div class="form-grid-3" style="margin-top:24px;">
+              <div class="field">
+                <label for="cashRefiRate15">Cash refi 15-year interest rate</label>
+                <input id="cashRefiRate15" type="number" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="cashRefiRate30">Cash refi 30-year interest rate</label>
+                <input id="cashRefiRate30" type="number" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="cashOutAmount">Cash-out amount</label>
+                <input id="cashOutAmount" type="number" readonly />
+                <div class="hint">This matches the HELOAN amount automatically.</div>
+              </div>
+            </div>
+
+            <div class="field" style="margin-top:24px;">
+              <label for="cashOutSlider">Adjust cash-out amount</label>
+              <div class="slider-wrap">
+                <input id="cashOutSlider" type="range" min="0" max="300000" step="1000" value="0" />
+              </div>
+              <div class="range-meta">
+                <span id="requestedCashOutText">Cash amount used: $0</span>
+                <span id="maxCashOutText">Maximum available: $0</span>
+              </div>
+            </div>
+
+            <div class="form-grid-2" style="margin-top:24px;">
+              <div class="field">
+                <label for="cashRefiFeePercent">Fee % of new loan amount</label>
+                <input id="cashRefiFeePercent" type="number" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="cashRefiFlatFee">Flat fee</label>
+                <input id="cashRefiFlatFee" type="number" />
+              </div>
+            </div>
+
+            <div class="switch-box" style="margin-top:24px;">
+              <div>
+                <div><strong>Roll fees into new loan</strong></div>
+                <div class="hint">Visual only in this version. Loan balance always includes fees and cash received stays equal to the HELOAN amount.</div>
+              </div>
+              <div id="rollFeesSwitch" class="switch active"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>HELOAN Inputs</h2>
+            <div class="desc">Enter the assumptions for the HELOAN option you want to compare.</div>
+
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="heloanAmount">HELOAN amount</label>
+                <input id="heloanAmount" type="number" />
+                <div class="hint" id="heloanMaxText">Maximum available: $0</div>
+              </div>
+              <div class="field">
+                <label for="heloanRate">HELOAN rate</label>
+                <input id="heloanRate" type="number" step="0.01" />
+              </div>
+            </div>
+
+            <div class="form-grid-3" style="margin-top:24px;">
+              <div class="field">
+                <label for="heloanRepaymentYears">Repayment term</label>
+                <select id="heloanRepaymentYears">
+                  <option value="10">10 years</option>
+                  <option value="15">15 years</option>
+                  <option value="20">20 years</option>
+                  <option value="30">30 years</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="heloanFeePercent">Fee % of new loan amount</label>
+                <input id="heloanFeePercent" type="number" step="0.01" />
+              </div>
+              <div class="field">
+                <label for="heloanFlatFee">Flat fee</label>
+                <input id="heloanFlatFee" type="number" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="comparisonCard" class="card" style="margin-top:32px;">
+        <div class="card-header-row">
+          <h2>Comparison Table</h2>
+          <a id="reportDownloadButton" class="button secondary" href="#" target="_blank" rel="noopener noreferrer" download>Download Report</a>
+        </div>
+        <div class="desc">Side-by-side comparison of HELOAN 20-year, Cash Refi 15-year, and Cash Refi 30-year using the information entered above.</div>
+
+        <div class="comparison-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Scenario</th>
+                <th>Cash Received</th>
+                <th>Loan Balance</th>
+                <th>Monthly Payment</th>
+                <th>Interest Rate</th>
+                <th>APR</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>HELOAN 20-Year</strong></td>
+                <td id="tblHeloanCashReceived">$0</td>
+                <td id="tblHeloanBalance">$0</td>
+                <td id="tblHeloanMonthly">$0.00</td>
+                <td id="tblHeloanRate">0.000%</td>
+                <td id="tblHeloanApr">0.000%</td>
+              </tr>
+              <tr>
+                <td><strong>Cash Refi 15-Year</strong></td>
+                <td id="tblCash15CashReceived">$0</td>
+                <td id="tblCash15Balance">$0</td>
+                <td id="tblCash15Monthly">$0.00</td>
+                <td id="tblCash15Rate">0.000%</td>
+                <td id="tblCash15Apr">0.000%</td>
+              </tr>
+              <tr>
+                <td><strong>Cash Refi 30-Year</strong></td>
+                <td id="tblCash30CashReceived">$0</td>
+                <td id="tblCash30Balance">$0</td>
+                <td id="tblCash30Monthly">$0.00</td>
+                <td id="tblCash30Rate">0.000%</td>
+                <td id="tblCash30Apr">0.000%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:24px; display:none;">
+        <h2>Actions</h2>
+        <div class="desc">Recalculation updates live as fields change. Save to update the customer record.</div>
+        <div class="action-row">
+          <button id="updateButton" class="button" type="button">Update Record</button>
+          <button id="resetButton" class="button ghost" type="button">Reset</button>
+        </div>
+        <div id="updateStatus" class="status-message" role="status" aria-live="polite"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function formatMoney(value, digits = 0) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+      }).format(Number.isFinite(value) ? value : 0);
+    }
+
+    function monthlyPayment(principal, annualRate, years) {
+      const monthlyRate = annualRate / 100 / 12;
+      const n = years * 12;
+      if (!principal || !n) return 0;
+      if (monthlyRate === 0) return principal / n;
+      return (principal * monthlyRate * Math.pow(1 + monthlyRate, n)) / (Math.pow(1 + monthlyRate, n) - 1);
+    }
+
+    function calculateAPR(loanAmount, payment, months, fees) {
+      const amountReceived = loanAmount - fees;
+      let low = 0;
+      let high = 1;
+      for (let i = 0; i < 50; i++) {
+        const mid = (low + high) / 2;
+        let pv = 0;
+        for (let t = 1; t <= months; t++) {
+          pv += payment / Math.pow(1 + mid / 12, t);
+        }
+        if (pv > amountReceived) low = mid;
+        else high = mid;
+      }
+      return ((low + high) / 2) * 100;
+    }
+
+    function maxCashOut(homeValue, currentBalance, maxCltv = 80) {
+      const maxLoan = homeValue * (maxCltv / 100);
+      return Math.max(maxLoan - currentBalance, 0);
+    }
+
+    const ids = [
+      "homeValue", "currentMortgageBalance", "cashRefiRate15", "cashRefiRate30", "cashOutAmount", "cashRefiFeePercent", "cashRefiFlatFee",
+      "heloanAmount", "heloanRate", "heloanRepaymentYears", "heloanFeePercent", "heloanFlatFee", "cashOutSlider"
+    ];
+    const els = Object.fromEntries(ids.map(id => [id, document.getElementById(id)]));
+    let comparisonMode = true;
+    let rollFeesIntoLoan = true;
+    let selectedRecord = null;
+    let selectedRecordId = "";
+    let lastLoadedForm = null;
+    let latestCalculation = null;
+
+    const comparisonSwitch = document.getElementById("comparisonSwitch");
+    const rollFeesSwitch = document.getElementById("rollFeesSwitch");
+    const comparisonCard = document.getElementById("comparisonCard");
+    const calculatorSections = document.getElementById("calculatorSections");
+    const customerSummaryCard = document.getElementById("customerSummaryCard");
+    const searchInput = document.getElementById("searchInput");
+    const searchButton = document.getElementById("searchButton");
+    const searchStatus = document.getElementById("searchStatus");
+    const updateButton = document.getElementById("updateButton");
+    const updateStatus = document.getElementById("updateStatus");
+    const resetButton = document.getElementById("resetButton");
+    const reportDownloadButton = document.getElementById("reportDownloadButton");
+
+    function num(id) {
+      return Number((els[id] && els[id].value) || 0) || 0;
+    }
+
+    function setText(id, value) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = value;
+    }
+
+    function setStatus(el, message, type = "") {
+      el.textContent = message || "";
+      el.className = `status-message${type ? ` ${type}` : ""}`;
+    }
+
+    function setReportDownloadLink(url) {
+      const normalized = typeof url === "string" ? url.trim() : "";
+      if (!normalized) {
+        reportDownloadButton.style.display = "none";
+        reportDownloadButton.removeAttribute("href");
+        return;
+      }
+      reportDownloadButton.href = normalized;
+      reportDownloadButton.style.display = "inline-flex";
+    }
+
+    function toNumber(value, fallback = 0) {
+      if (typeof value === "number") {
+        return Number.isFinite(value) ? value : fallback;
+      }
+      if (typeof value === "string") {
+        const normalized = value
+          .trim()
+          .replace(/[$,%\s]/g, "")
+          .replace(/,/g, "");
+        if (!normalized) return fallback;
+        const parsedFromString = Number(normalized);
+        return Number.isFinite(parsedFromString) ? parsedFromString : fallback;
+      }
+      const parsed = Number(value);
+      return Number.isFinite(parsed) ? parsed : fallback;
+    }
+
+    function getRawValue(record, keys, fallback = "") {
+      for (const key of keys) {
+        if (record && record[key] !== undefined && record[key] !== null && record[key] !== "") {
+          return record[key];
+        }
+      }
+      return fallback;
+    }
+
+    function getByPriority(record, keys, fallback = "") {
+      const inputData = record && record.inputData && typeof record.inputData === "object" ? record.inputData : null;
+      const normalizedData = record && record.normalizedData && typeof record.normalizedData === "object" ? record.normalizedData : null;
+      const webhookResponse = record && record.webhookResponse && typeof record.webhookResponse === "object" ? record.webhookResponse : null;
+
+      const fromNormalized = getRawValue(normalizedData, keys, undefined);
+      if (fromNormalized !== undefined) return fromNormalized;
+      const fromInput = getRawValue(inputData, keys, undefined);
+      if (fromInput !== undefined) return fromInput;
+      const fromRoot = getRawValue(record, keys, undefined);
+      if (fromRoot !== undefined) return fromRoot;
+      const fromWebhook = getRawValue(webhookResponse, keys, undefined);
+      if (fromWebhook !== undefined) return fromWebhook;
+      return fallback;
+    }
+
+    function mapApiRecordToForm(record) {
+      const inputData = record && record.inputData && typeof record.inputData === "object" ? record.inputData : {};
+      const normalizedData = record && record.normalizedData && typeof record.normalizedData === "object" ? record.normalizedData : {};
+      const webhookResponse = record && record.webhookResponse && typeof record.webhookResponse === "object" ? record.webhookResponse : {};
+      const heloanTermKeys = [
+        { years: 10, key: "HELOAN 10 years" },
+        { years: 15, key: "HELOAN 15 years" },
+        { years: 20, key: "HELOAN 20 years" },
+        { years: 30, key: "HELOAN 30 years" }
+      ];
+      let detectedHeloanYears = toNumber(getByPriority(record, ["heloanRepaymentYears"], 0), 0);
+      let detectedHeloanRate = toNumber(getByPriority(record, ["heloanRate"], 0), 0);
+      for (const term of heloanTermKeys) {
+        const value = getByPriority(record, [term.key], undefined);
+        if (value !== undefined && value !== null && value !== "") {
+          detectedHeloanYears = term.years;
+          detectedHeloanRate = toNumber(value, detectedHeloanRate);
+          break;
+        }
+      }
+
+      return {
+        id: String(getRawValue(record, ["id", "_id"], "")),
+        name: String(getRawValue(record, ["name", "Name"], getRawValue(inputData, ["name", "Name"], ""))),
+        email: String(getRawValue(record, ["email", "Email"], getRawValue(inputData, ["email", "Email"], ""))),
+        phone: String(getRawValue(record, ["phone", "Phone"], getRawValue(inputData, ["phone", "Phone"], ""))),
+        homeValue: toNumber(getRawValue(normalizedData, ["homeValue"], 0), 0),
+        currentMortgageBalance: toNumber(getByPriority(record, ["currentMortgageBalance", "Current Mortgage Balance"], 0), 0),
+        cashoutAmount: toNumber(getRawValue(inputData, ["Cashout or HELOAN Amt"], 0), 0),
+        cashRefiRate15: toNumber(getByPriority(record, ["cashRefiRate15", "Cash refi 15 yr interest rate"], 0), 0),
+        cashRefiRate30: toNumber(getByPriority(record, ["cashRefiRate30", "Cash refi 30 yr interest rate"], 0), 0),
+        heloanRate: detectedHeloanRate,
+        heloanRepaymentYears: detectedHeloanYears,
+        cashRefiFeePercent: toNumber(getRawValue(inputData, ["Fee"], 0), 0),
+        heloanFeePercent: toNumber(getRawValue(inputData, ["Fee"], 0), 0),
+        heloanFlatFee: toNumber(getByPriority(record, ["heloanFlatFee", "HELOAN Flat Fee"], 0), 0),
+        cashRefiFlatFee: toNumber(getByPriority(record, ["cashRefiFlatFee", "Cash Refi Flat Fee"], 0), 0),
+        webhookResponse
+      };
+    }
+
+    function patchFormFromRecord(model) {
+      els.homeValue.value = String(model.homeValue || 0);
+      els.currentMortgageBalance.value = String(model.currentMortgageBalance || 0);
+      els.cashRefiRate15.value = String(model.cashRefiRate15 || 0);
+      els.cashRefiRate30.value = String(model.cashRefiRate30 || 0);
+      els.cashRefiFlatFee.value = String(model.cashRefiFlatFee || 0);
+      els.heloanAmount.value = String(model.cashoutAmount || 0);
+      els.cashOutAmount.value = String(model.cashoutAmount || 0);
+      els.heloanRate.value = String(model.heloanRate || 0);
+      els.heloanRepaymentYears.value = String(model.heloanRepaymentYears || "");
+      els.cashRefiFeePercent.value = String(model.cashRefiFeePercent || 0);
+      els.heloanFeePercent.value = String(model.heloanFeePercent || 0);
+      els.heloanFlatFee.value = String(model.heloanFlatFee || 0);
+      els.cashOutSlider.value = String(model.cashoutAmount || 0);
+      console.log("[UF] mapped form data", model);
+    }
+
+    function getCurrentFormModel() {
+      return {
+        id: (selectedRecord && selectedRecord.id) || "",
+        name: (selectedRecord && selectedRecord.name) || "",
+        email: (selectedRecord && selectedRecord.email) || "",
+        phone: (selectedRecord && selectedRecord.phone) || "",
+        homeValue: num("homeValue"),
+        currentMortgageBalance: num("currentMortgageBalance"),
+        cashoutAmount: num("heloanAmount"),
+        cashRefiRate15: num("cashRefiRate15"),
+        cashRefiRate30: num("cashRefiRate30"),
+        heloanRate: num("heloanRate"),
+        heloanRepaymentYears: num("heloanRepaymentYears"),
+        cashRefiFeePercent: num("cashRefiFeePercent"),
+        heloanFeePercent: num("heloanFeePercent"),
+        heloanFlatFee: num("heloanFlatFee"),
+        cashRefiFlatFee: num("cashRefiFlatFee"),
+        webhookResponse: (selectedRecord && selectedRecord.webhookResponse) || {}
+      };
+    }
+
+    function buildUpdatePayload(model) {
+      return {
+        name: model.name || "",
+        email: model.email || "",
+        phone: model.phone || "",
+        inputData: {
+          homeValue: model.homeValue,
+          currentMortgageBalance: model.currentMortgageBalance,
+          cashoutAmount: model.cashoutAmount,
+          cashRefiRate15: model.cashRefiRate15,
+          cashRefiRate30: model.cashRefiRate30,
+          heloanRate: model.heloanRate,
+          heloanRepaymentYears: model.heloanRepaymentYears,
+          cashRefiFeePercent: model.cashRefiFeePercent,
+          heloanFeePercent: model.heloanFeePercent,
+          heloanFlatFee: model.heloanFlatFee,
+          cashRefiFlatFee: model.cashRefiFlatFee
+        },
+        normalizedData: {
+          id: model.id || "",
+          name: model.name || "",
+          email: model.email || "",
+          phone: model.phone || "",
+          homeValue: String(model.homeValue || 0),
+          currentMortgageBalance: String(model.currentMortgageBalance || 0),
+          cashoutAmount: String(model.cashoutAmount || 0),
+          cashRefiRate15: String(model.cashRefiRate15 || 0),
+          cashRefiRate30: String(model.cashRefiRate30 || 0),
+          heloanRate: String(model.heloanRate || 0),
+          heloanRepaymentYears: String(model.heloanRepaymentYears || 0),
+          cashRefiFeePercent: String(model.cashRefiFeePercent || 0),
+          heloanFeePercent: String(model.heloanFeePercent || 0),
+          heloanFlatFee: String(model.heloanFlatFee || 0),
+          cashRefiFlatFee: String(model.cashRefiFlatFee || 0)
+        },
+        calculationResult: latestCalculation || {},
+        webhookResponse: model.webhookResponse && typeof model.webhookResponse === "object" ? model.webhookResponse : {}
+      };
+    }
+
+    const API_BASE_URL = "http://localhost:7780";
+
+    async function searchCustomerRecord(search) {
+      if (!search) {
+        throw new Error("Search value is required");
+      }
+      const response = await fetch(`${API_BASE_URL}/api/united-financial/customer-record?search=${encodeURIComponent(search)}`, {
+        method: "GET",
+        headers: { "Accept": "application/json" }
+      });
+      const json = await response.json();
+      console.log("[UF] search API raw response", json);
+      if (!response.ok || !json.success) {
+        throw new Error((json && json.message) || "Failed to search customer records");
+      }
+      return json;
+    }
+
+    async function updateCustomerRecord(id, payload) {
+      if (!id) {
+        throw new Error("Customer record ID is missing");
+      }
+      console.log("[UF] update payload", payload);
+      const response = await fetch(`${API_BASE_URL}/api/united-financial/customer-record/${encodeURIComponent(id)}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const json = await response.json();
+      if (!response.ok || !json.success) {
+        throw new Error((json && json.message) || "Failed to update customer record");
+      }
+      return json;
+    }
+
+    function update() {
+      const homeValue = num("homeValue");
+      const currentMortgageBalance = num("currentMortgageBalance");
+      const cashRefiRate15 = num("cashRefiRate15");
+      const cashRefiRate30 = num("cashRefiRate30");
+      const cashRefiFeePercent = num("cashRefiFeePercent");
+      const cashRefiFlatFee = num("cashRefiFlatFee");
+      const heloanAmountInput = num("heloanAmount");
+      const heloanRate = num("heloanRate");
+      const heloanRepaymentYears = num("heloanRepaymentYears");
+      const heloanFeePercent = num("heloanFeePercent");
+      const heloanFlatFee = num("heloanFlatFee");
+
+      const maxAvailableCash = maxCashOut(homeValue, currentMortgageBalance, 80);
+      const matchedCashAmount = Math.min(heloanAmountInput, maxAvailableCash);
+      els.heloanAmount.value = String(matchedCashAmount);
+      els.cashOutAmount.value = String(matchedCashAmount);
+      els.cashOutSlider.max = String(Math.max(maxAvailableCash, 1000));
+      els.cashOutSlider.value = String(matchedCashAmount);
+
+      const estimatedBaseNewLoanBalance = currentMortgageBalance + matchedCashAmount;
+      const cashRefiFees = estimatedBaseNewLoanBalance * (cashRefiFeePercent / 100) + cashRefiFlatFee;
+      const cashRefiLoanBalance = estimatedBaseNewLoanBalance + cashRefiFees;
+      const cashRefi15Payment = monthlyPayment(cashRefiLoanBalance, cashRefiRate15, 15);
+      const cashRefi30Payment = monthlyPayment(cashRefiLoanBalance, cashRefiRate30, 30);
+      const cashRefi15Apr = calculateAPR(cashRefiLoanBalance, cashRefi15Payment, 15 * 12, cashRefiFees);
+      const cashRefi30Apr = calculateAPR(cashRefiLoanBalance, cashRefi30Payment, 30 * 12, cashRefiFees);
+
+      const heloanFees = matchedCashAmount * (heloanFeePercent / 100) + heloanFlatFee;
+      const heloanLoanBalance = matchedCashAmount + heloanFees;
+      const heloanPayment = monthlyPayment(heloanLoanBalance, heloanRate, heloanRepaymentYears);
+      const heloanApr = calculateAPR(heloanLoanBalance, heloanPayment, heloanRepaymentYears * 12, heloanFees);
+
+      latestCalculation = {
+        maxAvailableCash: maxAvailableCash,
+        matchedCashAmount: matchedCashAmount,
+        heloan: {
+          scenario: `HELOAN ${heloanRepaymentYears}-Year`,
+          cashReceived: matchedCashAmount,
+          loanBalance: heloanLoanBalance,
+          monthlyPayment: heloanPayment,
+          interestRate: heloanRate,
+          apr: heloanApr
+        },
+        cashRefi15: {
+          scenario: "Cash Refi 15-Year",
+          cashReceived: matchedCashAmount,
+          loanBalance: cashRefiLoanBalance,
+          monthlyPayment: cashRefi15Payment,
+          interestRate: cashRefiRate15,
+          apr: cashRefi15Apr
+        },
+        cashRefi30: {
+          scenario: "Cash Refi 30-Year",
+          cashReceived: matchedCashAmount,
+          loanBalance: cashRefiLoanBalance,
+          monthlyPayment: cashRefi30Payment,
+          interestRate: cashRefiRate30,
+          apr: cashRefi30Apr
+        }
+      };
+
+      setText("requestedCashOutText", `Cash amount used: ${formatMoney(matchedCashAmount)}`);
+      setText("maxCashOutText", `Maximum available: ${formatMoney(maxAvailableCash)}`);
+      setText("heloanMaxText", `Maximum available: ${formatMoney(maxAvailableCash)}`);
+      setText("tblHeloanCashReceived", formatMoney(matchedCashAmount));
+      setText("tblHeloanBalance", formatMoney(heloanLoanBalance));
+      setText("tblHeloanMonthly", formatMoney(heloanPayment, 2));
+      setText("tblHeloanRate", `${heloanRate.toFixed(2)}%`);
+      setText("tblHeloanApr", `${heloanApr.toFixed(2)}%`);
+      setText("tblCash15CashReceived", formatMoney(matchedCashAmount));
+      setText("tblCash15Balance", formatMoney(cashRefiLoanBalance));
+      setText("tblCash15Monthly", formatMoney(cashRefi15Payment, 2));
+      setText("tblCash15Rate", `${cashRefiRate15.toFixed(2)}%`);
+      setText("tblCash15Apr", `${cashRefi15Apr.toFixed(2)}%`);
+      setText("tblCash30CashReceived", formatMoney(matchedCashAmount));
+      setText("tblCash30Balance", formatMoney(cashRefiLoanBalance));
+      setText("tblCash30Monthly", formatMoney(cashRefi30Payment, 2));
+      setText("tblCash30Rate", `${cashRefiRate30.toFixed(2)}%`);
+      setText("tblCash30Apr", `${cashRefi30Apr.toFixed(2)}%`);
+
+      comparisonCard.style.display = comparisonMode ? "block" : "none";
+      comparisonSwitch.classList.toggle("active", comparisonMode);
+      rollFeesSwitch.classList.toggle("active", rollFeesIntoLoan);
+    }
+
+    comparisonSwitch.addEventListener("click", function () {
+      comparisonMode = !comparisonMode;
+      update();
+    });
+
+    rollFeesSwitch.addEventListener("click", function () {
+      rollFeesIntoLoan = !rollFeesIntoLoan;
+      update();
+    });
+
+    searchButton.addEventListener("click", async function () {
+      const searchValue = String(searchInput.value || "").trim();
+      setStatus(updateStatus, "");
+
+      if (!searchValue) {
+        setStatus(searchStatus, "Search value is required.", "error");
+        return;
+      }
+
+      searchButton.disabled = true;
+      setStatus(searchStatus, "Searching customer records...");
+      customerSummaryCard.style.display = "none";
+      calculatorSections.style.display = "none";
+      setReportDownloadLink("");
+
+      try {
+        const result = await searchCustomerRecord(searchValue);
+        const rows = Array.isArray(result.data) ? result.data : [];
+
+        if (!rows.length) {
+          selectedRecord = null;
+          selectedRecordId = "";
+          lastLoadedForm = null;
+          setText("summaryName", "-");
+          setText("summaryEmail", "-");
+          setText("summaryPhone", "-");
+          customerSummaryCard.style.display = "none";
+          calculatorSections.style.display = "none";
+          setReportDownloadLink("");
+          setStatus(searchStatus, result.message || "No customer records found.");
+          return;
+        }
+
+        const mapped = mapApiRecordToForm(rows[0]);
+        console.log("[UF] selected record", rows[0]);
+        const mappedRecordId = String(getRawValue(rows[0], ["_id", "id"], mapped.id || ""));
+        selectedRecord = mapped;
+        selectedRecord.id = mappedRecordId;
+        selectedRecordId = mappedRecordId;
+        patchFormFromRecord(mapped);
+        update();
+
+        setText("summaryName", mapped.name || "-");
+        setText("summaryEmail", mapped.email || "-");
+        setText("summaryPhone", mapped.phone || "-");
+        const reportImageUrl =
+          String(getRawValue(rows[0], ["reportImageUrl"], "")) ||
+          String(getRawValue(rows[0].calculationResult || {}, ["reportImageUrl", "comparisonImageUrl"], ""));
+        setReportDownloadLink(reportImageUrl);
+
+        customerSummaryCard.style.display = "block";
+        calculatorSections.style.display = "block";
+        lastLoadedForm = getCurrentFormModel();
+        setStatus(searchStatus, "Record loaded successfully.", "success");
+      } catch (error) {
+        selectedRecord = null;
+        selectedRecordId = "";
+        setReportDownloadLink("");
+        setStatus(searchStatus, (error && error.message) || "Unable to fetch customer records.", "error");
+      } finally {
+        searchButton.disabled = false;
+      }
+    });
+
+    searchInput.addEventListener("keydown", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchButton.click();
+      }
+    });
+
+    updateButton.addEventListener("click", async function () {
+      if (!selectedRecord || !selectedRecordId) {
+        setStatus(updateStatus, "Load a customer record before updating.", "error");
+        return;
+      }
+
+      updateButton.disabled = true;
+      setStatus(updateStatus, "Updating customer record...");
+
+      try {
+        const currentModel = getCurrentFormModel();
+        const payload = buildUpdatePayload(currentModel);
+        const response = await updateCustomerRecord(selectedRecordId, payload);
+        selectedRecord = Object.assign({}, selectedRecord, currentModel);
+        lastLoadedForm = currentModel;
+        setStatus(updateStatus, (response && response.message) || "Customer record updated successfully.", "success");
+      } catch (error) {
+        setStatus(updateStatus, (error && error.message) || "Unable to update customer record.", "error");
+      } finally {
+        updateButton.disabled = false;
+      }
+    });
+
+    resetButton.addEventListener("click", function () {
+      if (!lastLoadedForm) {
+        setStatus(updateStatus, "No loaded data to reset.", "error");
+        return;
+      }
+      patchFormFromRecord(lastLoadedForm);
+      update();
+      setStatus(updateStatus, "Calculator values reset to loaded record.");
+    });
+
+    els.cashOutSlider.addEventListener("input", function (e) {
+      els.heloanAmount.value = e.target.value;
+      update();
+    });
+
+    ids.filter(id => id !== "cashOutSlider" && id !== "cashOutAmount").forEach(function (id) {
+      if (els[id]) {
+        els[id].addEventListener("input", update);
+        els[id].addEventListener("change", update);
+      }
+    });
+
+    update();
+    setStatus(searchStatus, "Search a customer to load calculator data.");
+  </script>
+</body>
+</html>
