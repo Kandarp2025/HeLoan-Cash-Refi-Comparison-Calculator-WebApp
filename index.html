@@ -315,7 +315,7 @@
       return ((low + high) / 2) * 100;
     }
 
-    function maxCashOut(homeValue, currentBalance, maxCltv = 150) {
+    function maxCashOut(homeValue, currentBalance, maxCltv = 1500) {
       const maxLoan = homeValue * (maxCltv / 100);
       return Math.max(maxLoan - currentBalance, 0);
     }
@@ -531,7 +531,8 @@
       };
     }
 
-    const API_BASE_URL = "http://localhost:7780";
+    // const API_BASE_URL = "http://localhost:7780";
+    const API_BASE_URL = "utdf-heloancashreficalculator-production.up.railway.app";
 
     async function searchCustomerRecord(search) {
       if (!search) {

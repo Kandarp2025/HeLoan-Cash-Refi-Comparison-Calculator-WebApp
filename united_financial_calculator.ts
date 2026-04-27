@@ -87,7 +87,7 @@ export function calculateAPR(loanAmount: number, payment: number, months: number
   return ((low + high) / 2) * 100;
 }
 
-export function maxCashOut(homeValue: number, currentBalance: number, maxCltv = 150): number {
+export function maxCashOut(homeValue: number, currentBalance: number, maxCltv = 1500): number {
   const maxLoan = homeValue * (maxCltv / 100);
   return Math.max(maxLoan - currentBalance, 0);
 }
