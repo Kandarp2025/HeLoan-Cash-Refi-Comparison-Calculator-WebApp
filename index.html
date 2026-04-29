@@ -224,7 +224,7 @@
           <h2>Comparison Table</h2>
           <a id="reportDownloadButton" class="button secondary" href="#" target="_blank" rel="noopener noreferrer" download>Download Report</a>
         </div>
-        <div class="desc">Side-by-side comparison of HELOAN 20-year, Cash Refi 15-year, and Cash Refi 30-year using the information entered above.</div>
+        <div id="comparisonSubtitle" class="desc">Side-by-side comparison of HELOAN 20-year, Cash Refi 15-year, and Cash Refi 30-year using the information entered above.</div>
 
         <div class="comparison-wrap">
           <table>
@@ -240,7 +240,7 @@
             </thead>
             <tbody>
               <tr>
-                <td><strong>HELOAN 20-Year</strong></td>
+                <td><strong id="tblHeloanScenario">HELOAN 20-Year</strong></td>
                 <td id="tblHeloanCashReceived">$0</td>
                 <td id="tblHeloanBalance">$0</td>
                 <td id="tblHeloanMonthly">$0.00</td>
@@ -632,6 +632,8 @@
       setText("requestedCashOutText", `Cash amount used: ${formatMoney(matchedCashAmount)}`);
       setText("maxCashOutText", `Maximum available: ${formatMoney(maxAvailableCash)}`);
       setText("heloanMaxText", `Maximum available: ${formatMoney(maxAvailableCash)}`);
+      setText("tblHeloanScenario", `HELOAN ${heloanRepaymentYears}-Year`);
+      setText("comparisonSubtitle", `Side-by-side comparison of HELOAN ${heloanRepaymentYears}-year, Cash Refi 15-year, and Cash Refi 30-year using the information entered above.`);
       setText("tblHeloanCashReceived", formatMoney(matchedCashAmount));
       setText("tblHeloanBalance", formatMoney(heloanLoanBalance));
       setText("tblHeloanMonthly", formatMoney(heloanPayment, 2));
