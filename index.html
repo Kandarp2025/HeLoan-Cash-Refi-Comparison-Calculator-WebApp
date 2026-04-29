@@ -60,7 +60,6 @@
     .switch-box { display: flex; justify-content: space-between; align-items: center; gap: 16px; border: 1px solid var(--border); border-radius: 18px; padding: 16px; }
     .comparison-wrap { overflow-x: auto; }
     .card-header-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-    #reportDownloadButton { display: none; text-decoration: none; }
     table { width: 100%; border-collapse: separate; border-spacing: 0; border: 1px solid var(--border); border-radius: 18px; overflow: hidden; background: white; }
     th { background: var(--dark); color: white; text-align: left; padding: 14px 16px; font-size: 14px; }
     td { padding: 14px 16px; border-top: 1px solid var(--border); font-size: 14px; }
@@ -222,7 +221,6 @@
       <div id="comparisonCard" class="card" style="margin-top:32px;">
         <div class="card-header-row">
           <h2>Comparison Table</h2>
-          <a id="reportDownloadButton" class="button secondary" href="#" target="_blank" rel="noopener noreferrer" download>Download Report</a>
         </div>
         <div id="comparisonSubtitle" class="desc">Side-by-side comparison of HELOAN 20-year, Cash Refi 15-year, and Cash Refi 30-year using the information entered above.</div>
 
@@ -343,7 +341,6 @@
     const updateButton = document.getElementById("updateButton");
     const updateStatus = document.getElementById("updateStatus");
     const resetButton = document.getElementById("resetButton");
-    const reportDownloadButton = document.getElementById("reportDownloadButton");
 
     function num(id) {
       return Number((els[id] && els[id].value) || 0) || 0;
@@ -357,17 +354,6 @@
     function setStatus(el, message, type = "") {
       el.textContent = message || "";
       el.className = `status-message${type ? ` ${type}` : ""}`;
-    }
-
-    function setReportDownloadLink(url) {
-      const normalized = typeof url === "string" ? url.trim() : "";
-      if (!normalized) {
-        reportDownloadButton.style.display = "none";
-        reportDownloadButton.removeAttribute("href");
-        return;
-      }
-      reportDownloadButton.href = normalized;
-      reportDownloadButton.style.display = "inline-flex";
     }
 
     function toNumber(value, fallback = 0) {
@@ -678,7 +664,6 @@
       setStatus(searchStatus, "Searching customer records...");
       customerSummaryCard.style.display = "none";
       calculatorSections.style.display = "none";
-      setReportDownloadLink("");
 
       try {
         const result = await searchCustomerRecord(searchValue);
@@ -693,7 +678,6 @@
           setText("summaryPhone", "-");
           customerSummaryCard.style.display = "none";
           calculatorSections.style.display = "none";
-          setReportDownloadLink("");
           setStatus(searchStatus, result.message || "No customer records found.");
           return;
         }
@@ -710,11 +694,6 @@
         setText("summaryName", mapped.name || "-");
         setText("summaryEmail", mapped.email || "-");
         setText("summaryPhone", mapped.phone || "-");
-        const reportImageUrl =
-          String(getRawValue(rows[0], ["reportImageUrl"], "")) ||
-          String(getRawValue(rows[0].calculationResult || {}, ["reportImageUrl", "comparisonImageUrl"], ""));
-        setReportDownloadLink(reportImageUrl);
-
         customerSummaryCard.style.display = "block";
         calculatorSections.style.display = "block";
         lastLoadedForm = getCurrentFormModel();
@@ -722,7 +701,6 @@
       } catch (error) {
         selectedRecord = null;
         selectedRecordId = "";
-        setReportDownloadLink("");
         setStatus(searchStatus, (error && error.message) || "Unable to fetch customer records.", "error");
       } finally {
         searchButton.disabled = false;
